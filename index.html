@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#09090a">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Reinforcement Learning</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'}};</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
+<style>
+:root{color-scheme:dark;--bg:#09090a;--panel:#131315;--line:#2a2a2e;--red:#ff2a3d;--red2:#a8101e;--txt:#e6e6e8;--dim:#9a9aa3}
+*,*:before,*:after{box-sizing:border-box}
+html{font-size:calc(var(--fs,100) * 1%);-webkit-text-size-adjust:100%;scroll-padding-top:64px;scroll-behavior:smooth;height:100%}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--txt);font:1rem/1.65 "JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere;overflow-x:hidden;
+padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);
+background-image:linear-gradient(rgba(255,42,61,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,42,61,.045) 1px,transparent 1px);background-size:36px 36px;-webkit-tap-highlight-color:rgba(255,42,61,.25)}
+h1,h2,h3{font-family:Orbitron,"Arial Black",sans-serif;letter-spacing:.02em;margin:0 0 .5em;line-height:1.15}
+h1{font-size:clamp(1.9rem,9vw,4.6rem);font-weight:800}
+h2{font-size:clamp(1.25rem,4.6vw,1.9rem);color:var(--red);border-left:4px solid var(--red);padding-left:12px}
+h3{font-size:1.02rem;color:#fff;margin-top:1.5em}
+h4{margin:1.1em 0 .3em;color:#ffb3ba;font-size:.95rem}
+p,li{max-width:100%}
+nav{position:sticky;top:0;z-index:20;background:rgba(9,9,10,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--red2);display:flex;gap:4px;overflow-x:auto;padding:6px 8px;scrollbar-width:none;align-items:center}
+nav a{color:var(--dim);text-decoration:none;white-space:nowrap;padding:8px 10px;font-size:.82rem}
+nav a:hover,nav a:focus-visible,nav a.cur{color:#000;background:var(--red);outline:none}
+#gear{margin-left:auto;flex:none;font-size:1.1rem;padding:4px 10px}
+#panel{position:fixed;top:52px;right:8px;z-index:30;width:min(300px,calc(100vw - 16px));background:#101012;border:1px solid var(--red);padding:14px;box-shadow:0 8px 30px #000}
+#panel[hidden]{display:none}
+#panel label{display:flex;align-items:center;gap:8px;margin:10px 0;color:var(--txt);font-size:.85rem}
+#panel input[type=checkbox]{width:20px;height:20px;accent-color:var(--red)}
+header{padding:9vh 16px 5vh;max-width:1000px;margin:auto}
+header p{color:var(--dim);max-width:62ch}
+.hl{color:var(--red);text-shadow:0 0 24px rgba(255,42,61,.6)}
+main{max-width:1000px;margin:auto;padding:0 14px 90px}
+body.fw main,body.fw header{max-width:none}
+section{margin-top:52px}
+.card{background:var(--panel);border:1px solid var(--line);border-top:2px solid var(--red2);padding:14px;margin:12px 0;border-radius:3px}
+.eq{background:#0d0d0f;border:1px solid var(--line);border-left:3px solid var(--red);padding:6px 10px;margin:10px 0;overflow-x:auto;overflow-y:hidden;max-width:100%}
+.eq mjx-container{max-width:100%;margin:.3em 0!important}
+pre{background:#0d0d0f;border:1px solid var(--line);padding:10px;overflow-x:auto;margin:10px 0;color:#f3c5c9;font-size:.8rem;line-height:1.5;max-width:100%;overflow-wrap:normal}
+table{border-collapse:collapse;width:100%;font-size:.85rem;margin:10px 0}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+th{background:#1b1214;color:var(--red)}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}
+.g2>.card{margin:0}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px;margin:12px 0}
+.node{flex:1 1 130px;background:#1b1214;border:1.5px solid var(--red);padding:10px;text-align:center;font-size:.85rem}
+.node b{display:block;color:#fff;font-size:.95rem}
+.node small{color:var(--dim)}
+.arr{flex:0 1 110px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--red);font-size:.75rem;text-align:center}
+.arr:after{content:'→';font-size:1.4rem;line-height:1}
+.note{color:var(--dim);font-size:.85rem}
+.stat{color:var(--red);font-weight:600}
+.bar{display:flex;height:26px;margin:8px 0;border:1px solid var(--red2);font-size:.75rem}
+.bar span{display:flex;align-items:center;justify-content:center;overflow:hidden;white-space:nowrap;transition:width .15s}
+button{font:inherit;font-size:.9rem;background:#1a1a1d;color:var(--txt);border:1px solid var(--red2);padding:8px 14px;min-height:44px;min-width:44px;cursor:pointer;border-radius:2px;touch-action:manipulation}
+button:hover,button:focus-visible{background:var(--red2);outline:none}
+button.on{background:var(--red);color:#000;font-weight:600}
+@media(hover:none){button:not(.on):hover{background:#1a1a1d}}
+input[type=range]{accent-color:var(--red);width:100%;height:32px;touch-action:manipulation}
+label.l{display:block;font-size:.8rem;color:var(--dim)}
+.ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px;margin:10px 0}
+.row{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.row button{flex:1 1 auto}
+.sim-bar{position:sticky;bottom:0;z-index:15;background:rgba(9,9,10,.96);border-top:1px solid var(--red2);padding:8px 0;margin:0}
+body.nost .sim-bar{position:static}
+canvas{width:100%;display:block;background:#050506;border:1px solid var(--red2);touch-action:pan-y}
+@media(max-width:560px){
+ header{padding-top:6vh}main{padding:0 10px 90px}section{margin-top:40px}
+ .card{padding:11px}.node{flex-basis:100%}.arr{flex-basis:100%;flex-direction:row;gap:8px}.arr:after{content:'↓'}
+ table,tbody,tr,td{display:block;width:100%}tr.hr{display:none}
+ tr{border:1px solid var(--line);margin-bottom:8px;background:#101012}
+ td{border:0;border-bottom:1px solid #1d1d20;padding:5px 10px}
+ td:before{content:attr(data-l);display:block;color:var(--red);font-size:.7rem}
+ .eq{font-size:.92em}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style></head><body>
+<nav><a href="#basics">Basics</a><a href="#learn">Learning</a><a href="#mdp">MDP</a><a href="#value">Value &amp; Bellman</a><a href="#types">Types</a><a href="#dp">DP</a><a href="#lab">Simulator</a><a href="#mctd">MC &amp; TD</a><a href="#deep">Deep RL</a><a href="#ppo">PPO &amp; more</a><a href="#rlhf">RLHF</a><button id="gear" aria-label="Display settings" aria-expanded="false">⚙</button></nav>
+<div id="panel" hidden><b>Display settings</b>
+<label class="l" style="margin-top:10px">Text size: <span id="tsv" class="stat">100%</span></label><input id="ts" type="range" min="80" max="170" step="5" value="100">
+<label><input type="checkbox" id="st" checked> Keep simulator buttons pinned</label>
+<label><input type="checkbox" id="fw"> Use full screen width</label>
+<button id="rs" style="width:100%">Reset display</button></div>
+<header><h1>REINFORCEMENT<br><span class="hl">LEARNING</span></h1>
+<p>Complete notes, from foundations to classical RL, model-free methods, deep RL and RLHF. Equations, definitions, algorithms and a live gridworld simulator. Use the ⚙ button to fit text and layout to your screen.</p></header>
+<main>
+
+<section id="basics"><h2>Part 1: Fundamentals</h2>
+<div class="card"><b>Roadmap:</b> 1 Fundamentals → 2 Mathematical foundation → 3 Types of RL → 4 Dynamic programming → 5 Monte Carlo → 6 Temporal difference → 7 Deep RL → 8 Modern algorithms → 9 RLHF.</div>
+<h3>1. What is reinforcement learning?</h3>
+<p>Reinforcement learning (RL) is a machine learning paradigm in which an <b>agent</b> learns to make decisions by interacting with an <b>environment</b> and receiving rewards or penalties.</p>
+<ul><li>Supervised learning receives labelled examples.</li><li>Unsupervised learning discovers patterns in data.</li><li>Reinforcement learning learns through interaction and feedback.</li></ul>
+<h4>Example: training a robot to walk</h4>
+<ol><li>The robot observes its current situation.</li><li>It chooses an action, such as moving its leg.</li><li>The environment responds.</li><li>It receives a reward or penalty.</li><li>It adjusts its behaviour to improve future performance.</li></ol>
+<p>The objective is not simply to maximize the immediate reward. It is to maximize the <b>total expected cumulative reward</b> over time.</p>
+<h4>Basic RL interaction loop</h4>
+<div class="flow"><div class="node"><b>AGENT</b><small>learns and makes decisions</small></div><div class="arr">Action \(A_t\)</div><div class="node"><b>ENVIRONMENT</b><small>responds to the agent</small></div><div class="arr">Next state \(S_{t+1}\)<br>Reward \(R_{t+1}\)</div><div class="node"><b>AGENT</b><small>uses feedback to improve its decisions</small></div></div>
+<h4>Real-world applications</h4>
+<table><tr><th>Application</th><th>RL task</th></tr><tr><td>Robotics</td><td>Learning to walk, grasp and manipulate objects</td></tr><tr><td>Autonomous vehicles</td><td>Decision-making and navigation</td></tr><tr><td>Games</td><td>Learning strategies to win</td></tr><tr><td>Recommendation</td><td>Optimizing long-term user engagement</td></tr><tr><td>Finance</td><td>Sequential portfolio decisions</td></tr><tr><td>LLMs</td><td>Aligning model responses with human preferences</td></tr><tr><td>Industrial automation</td><td>Optimizing control systems</td></tr></table>
+
+<h3>2. Components of reinforcement learning</h3>
+<p>There are five fundamental components, plus a few important concepts.</p>
+<div class="g2">
+<div class="card"><b>2.1 Agent</b><br>The learner or decision-maker. Example: a robot, game-playing AI or trading algorithm.</div>
+<div class="card"><b>2.2 Environment</b><br>Everything the agent interacts with. Example: a maze, chessboard, road or simulated factory.</div>
+<div class="card"><b>2.3 State (S)</b><br>The current situation of the environment. Example: the robot’s position in a maze.<div class="eq">\[S_t=\text{state at time }t\]</div></div>
+<div class="card"><b>2.4 Action (A)</b><br>The decision made by the agent. Example: move left, right, forward or backward.<div class="eq">\[A_t=\text{action at time }t\]</div></div>
+<div class="card"><b>2.5 Reward (R)</b><br>Numerical feedback after an action. Example: destination +100, obstacle −20, each unnecessary step −1.<div class="eq">\[R_{t+1}=\text{reward after action }A_t\]</div></div>
+<div class="card"><b>6. Policy (π)</b><br>The strategy used to select actions. It can be deterministic or stochastic.<div class="eq">\[\pi(a|s)=P(A_t=a\mid S_t=s)\]</div></div>
+<div class="card"><b>7. Value function</b><br>Estimates how good a state or action is in terms of future rewards.</div>
+<div class="card"><b>8. Model</b><br>Predicts how the environment behaves after an action: the next state and the expected reward. Not every RL algorithm uses a model.</div></div>
+<h4>Complete terminology</h4>
+<table><tr><th>Component</th><th>Meaning</th><th>Example</th></tr><tr><td>Agent</td><td>Decision-maker</td><td>Robot</td></tr><tr><td>Environment</td><td>Surroundings</td><td>Maze</td></tr><tr><td>State</td><td>Current situation</td><td>Position</td></tr><tr><td>Action</td><td>Decision</td><td>Move right</td></tr><tr><td>Reward</td><td>Feedback</td><td>+10</td></tr><tr><td>Policy</td><td>Decision strategy</td><td>Choose right</td></tr><tr><td>Value function</td><td>Future reward estimate</td><td>Goodness of position</td></tr><tr><td>Model</td><td>Environment predictor</td><td>Predict next position</td></tr></table>
+</section>
+
+<section id="learn"><h2>3. How does an agent learn?</h2>
+<p>Suppose we train an agent to reach a destination in a maze. Initially it does not know which route is best. It may:</p>
+<ol><li>Try moving left.</li><li>Receive a penalty.</li><li>Try moving right.</li><li>Discover that moving right brings it closer to the destination.</li><li>Gradually learn better actions.</li></ol>
+<div class="g2"><div class="card"><b>3.1 Exploration</b><br>Trying unfamiliar actions to discover potentially better rewards. Example: trying a new route.</div>
+<div class="card"><b>3.2 Exploitation</b><br>Choosing the action currently believed to be the best. Example: using the route already known to work.</div></div>
+<h4>Exploration vs exploitation trade-off</h4>
+<p>An agent must balance both. Too much exploration means it keeps trying random actions. Too much exploitation means it may never discover a better strategy.</p>
+<h4>Epsilon-greedy strategy</h4>
+<div class="eq">\[a_t=\begin{cases}\text{random action}&\text{with probability }\epsilon\\ \text{best-known action}&\text{with probability }1-\epsilon\end{cases}\]</div>
+<div class="card"><label class="l">ε = <span id="epv" class="stat">0.10</span></label><input id="eps0" type="range" min="0" max="1" step="0.01" value="0.1">
+<div class="bar"><span id="b1" style="background:var(--red);color:#000"></span><span id="b2" style="background:#222"></span></div>
+<p class="note">Usually ε is reduced gradually during training.</p></div>
+
+<h3>4. Return and discount factor</h3>
+<p>An agent wants to maximize cumulative rewards, not just one immediate reward.</p>
+<h4>4.1 Return (episodic task)</h4>
+<div class="eq">\[G_t=R_{t+1}+R_{t+2}+\cdots+R_T\]</div>
+<h4>4.2 Discounted return</h4>
+<div class="eq">\[G_t=\sum_{k=0}^{T-t-1}\gamma^kR_{t+k+1}\]</div>
+<p>For continuing tasks the sum extends to infinity, with \(0\le\gamma\le1\) the discount factor:</p>
+<div class="eq">\[G_t=\sum_{k=0}^{\infty}\gamma^kR_{t+k+1}\]</div>
+<table><tr><th>Gamma</th><th>Meaning</th></tr><tr><td>0</td><td>Only immediate rewards matter</td></tr><tr><td>0.5</td><td>Future rewards matter, but less</td></tr><tr><td>0.9</td><td>Future rewards are important</td></tr><tr><td>1</td><td>No discounting</td></tr></table>
+<div class="card"><b>Example:</b> immediate reward 10, next reward 20.
+<div class="eq">\[G_t=10+\gamma(20)\]</div>
+<label class="l">γ = <span id="gv" class="stat">0.90</span></label><input id="gs" type="range" min="0" max="1" step="0.01" value="0.9">
+<p>The next reward is valued at <span id="gd" class="stat"></span> instead of 20, so G = <span id="gr" class="stat"></span>. (At γ = 0.9 this is 18 and 28.)</p></div>
+</section>
+
+<section id="mdp"><h2>Part 2: Mathematical foundation</h2>
+<h3>5. Markov decision process (MDP)</h3>
+<p>An MDP is the mathematical framework for sequential decision-making problems in RL, generally written as</p>
+<div class="eq">\[(S,A,P,R,\gamma)\]</div>
+<table><tr><th>Symbol</th><th>Meaning</th></tr><tr><td>\(S\)</td><td>Set of possible states</td></tr><tr><td>\(A\)</td><td>Set of possible actions</td></tr><tr><td>\(P\)</td><td>State transition probability</td></tr><tr><td>\(R\)</td><td>Reward function</td></tr><tr><td>\(\gamma\)</td><td>Discount factor</td></tr></table>
+<h4>5.1 State transition probability</h4>
+<p>The probability of reaching the next state after taking an action.</p>
+<div class="eq">\[P(s'|s,a)=P(S_{t+1}=s'\mid S_t=s,A_t=a)\]</div>
+<p>Example: a robot moves right. 80% it moves right, 10% it stays, 10% it slips left. The environment is <b>stochastic</b> because the next state is not perfectly predictable.</p>
+<h4>5.2 Markov property</h4>
+<p>The future depends on the current state and action, not on the complete history of previous states and actions.</p>
+<div class="eq">\[P(S_{t+1}|S_t,A_t,S_{t-1},\ldots)=P(S_{t+1}|S_t,A_t)\]</div>
+<p>Why useful? The agent does not need to remember the entire history if the current state contains all relevant information.</p>
+<h4>5.3 Episode</h4>
+<p>One complete interaction sequence from the initial state to a terminal state. Example: start a maze, navigate, reach the destination, episode ends.</p>
+<h4>5.4 Continuing and episodic tasks</h4>
+<table><tr><th>Episodic</th><th>Continuing</th></tr><tr><td>Has a terminal state</td><td>No natural terminal state</td></tr><tr><td>Divided into episodes</td><td>Continuous interaction</td></tr><tr><td>Example: chess</td><td>Example: industrial temperature control</td></tr></table>
+<h4>MDP interaction diagram</h4>
+<div class="flow"><div class="node"><b>Current state</b>\(S_t\)</div><div class="arr">agent selects</div><div class="node"><b>Action</b>\(A_t\)</div><div class="arr">environment applies \(P(s'|s,a)\)</div><div class="node"><b>Next state + reward</b>\(S_{t+1},R_{t+1}\)</div><div class="arr">repeat</div></div>
+</section>
+
+<section id="value"><h2>6. Value functions and Bellman equations</h2>
+<p>A value function estimates the expected future discounted reward. There are two primary ones.</p>
+<h4>6.1 State-value function \(V^\pi(s)\)</h4>
+<p>How good is it to be in state s if the agent follows policy π?</p>
+<div class="eq">\[V^\pi(s)=\mathbb{E}_\pi[G_t\mid S_t=s]\]</div>
+<div class="eq">\[V^\pi(s)=\mathbb{E}_\pi\Big[\sum_{k=0}^{\infty}\gamma^kR_{t+k+1}\ \Big|\ S_t=s\Big]\]</div>
+<p class="note">Example: a state near the destination might have value +80, one near an obstacle −20.</p>
+<h4>6.2 Action-value function \(Q^\pi(s,a)\)</h4>
+<p>How good is it to take action a in state s, and then follow π?</p>
+<div class="eq">\[Q^\pi(s,a)=\mathbb{E}_\pi[G_t\mid S_t=s,A_t=a]\]</div>
+<table><tr><th>Action at an intersection</th><th>Q-value</th></tr><tr><td>Left</td><td>10</td></tr><tr><td>Right</td><td>70</td></tr><tr><td>Forward</td><td>30</td></tr><tr><td>Backward</td><td>−5</td></tr></table>
+<p class="note">The agent prefers moving right based on its current estimates.</p>
+<h4>6.3 Difference between V and Q</h4>
+<p><b>V(s)</b>: how good is this state? <b>Q(s,a)</b>: how good is this action in this state?</p>
+<div class="eq">\[V^\pi(s)=\sum_a\pi(a|s)Q^\pi(s,a)\]</div>
+<p>For a deterministic greedy policy:</p>
+<div class="eq">\[V^*(s)=\max_aQ^*(s,a)\]</div>
+<h4>6.4 Optimal value functions</h4>
+<div class="eq">\[V^*(s)=\max_\pi V^\pi(s)\]</div><div class="eq">\[Q^*(s,a)=\max_\pi Q^\pi(s,a)\]</div>
+<p>These represent the best possible expected future returns.</p>
+<h4>6.5 Bellman equations</h4>
+<p>They express the value of a state in terms of immediate reward and future value.</p>
+<p><b>Bellman expectation equation</b></p>
+<div class="eq">\[V^\pi(s)=\sum_a\pi(a|s)\sum_{s'}P(s'|s,a)\big[R(s,a,s')+\gamma V^\pi(s')\big]\]</div>
+<p class="note">Current value = immediate reward + discounted future value.</p>
+<p><b>Bellman optimality equation</b></p>
+<div class="eq">\[V^*(s)=\max_a\sum_{s'}P(s'|s,a)\big[R(s,a,s')+\gamma V^*(s')\big]\]</div>
+<p>The expectation equation evaluates a particular policy. The optimality equation considers the best available action. The optimal Q equation:</p>
+<div class="eq">\[Q^*(s,a)=\sum_{s'}P(s'|s,a)\big[R(s,a,s')+\gamma\max_{a'}Q^*(s',a')\big]\]</div>
+</section>
+
+<section id="types"><h2>Part 3: Types of reinforcement learning</h2>
+<h3>7. Model-based vs model-free RL</h3>
+<p>The classification depends on whether the agent uses a model of the environment to predict future outcomes.</p>
+<h4>7.1 Model-based RL</h4>
+<p>The agent has or learns a model that predicts the next state and the reward, then plans with it.</p>
+<div class="eq">\[\hat P(s'|s,a),\qquad\hat R(s,a)\]</div>
+<p>Example: a robot learns that moving right usually takes it closer to a destination, and plans a route before actually moving.</p>
+<ol><li>Observe the environment.</li><li>Learn or obtain its transition and reward model.</li><li>Predict possible future states and rewards.</li><li>Plan which action is best.</li><li>Execute the action.</li><li>Update the model using new observations.</li></ol>
+<p class="note">Examples: dynamic programming (known model), Dyna-Q, model predictive control (MPC) with a learned model.</p>
+<h4>7.2 Model-free RL</h4>
+<p>The agent does not explicitly learn or use a transition model for planning. It learns directly from experience.</p>
+<ol><li>Observe the current state.</li><li>Select an action.</li><li>Receive the reward and next state.</li><li>Update the value function or policy.</li><li>Repeat.</li></ol>
+<p class="note">Examples: Monte Carlo, SARSA, Q-learning, DQN, PPO.</p>
+<table><tr><th>Model-based</th><th>Model-free</th></tr><tr><td>Uses environment model</td><td>Does not require an explicit model</td></tr><tr><td>Can plan before acting</td><td>Learns through experience</td></tr><tr><td>Can be sample-efficient</td><td>Often requires more interactions</td></tr><tr><td>Model errors can affect planning</td><td>No learned transition model required</td></tr><tr><td>Example: Dyna-Q</td><td>Example: SARSA</td></tr></table>
+<div class="card"><b>Important:</b> model-free does not mean no internal knowledge. It may learn value functions, Q-functions or policies. It simply does not use an explicit transition model for planning.</div>
+
+<h3 id="onoff">8. On-policy vs off-policy RL</h3>
+<p>This classification is about the relationship between the policy used to collect experience and the policy being learned or evaluated.</p>
+<h4>8.1 On-policy learning</h4>
+<p>Learn from the actions you actually take using your current policy. Example: SARSA with an ε-greedy policy (90% best-known, 10% random) updates using the next action actually selected, even if exploratory.</p>
+<div class="eq">\[Q(S_t,A_t)\leftarrow Q(S_t,A_t)+\alpha\big[R_{t+1}+\gamma Q(S_{t+1},A_{t+1})-Q(S_t,A_t)\big]\]</div>
+<div class="flow"><div class="node"><b>Current policy π</b></div><div class="arr">generates</div><div class="node"><b>Actions and experience</b></div><div class="arr">improves</div><div class="node"><b>Same policy π</b></div></div>
+<p class="note">Examples: SARSA, on-policy Monte Carlo control, PPO (standard), REINFORCE.</p>
+<h4>8.2 Off-policy learning</h4>
+<p>Learn a <b>target policy</b> (π) from experience generated by a <b>behaviour policy</b> (μ). Example: Q-learning may take a random exploratory action, but its update assumes the best action next.</p>
+<div class="eq">\[Q(S_t,A_t)\leftarrow Q(S_t,A_t)+\alpha\big[R_{t+1}+\gamma\max_aQ(S_{t+1},a)-Q(S_t,A_t)\big]\]</div>
+<div class="flow"><div class="node"><b>Behaviour policy μ</b></div><div class="arr">generates</div><div class="node"><b>Experience</b></div><div class="arr">learns</div><div class="node"><b>Target policy π</b></div></div>
+<p class="note">Examples: Q-learning, off-policy Monte Carlo, DQN, DDPG, SAC.</p>
+<table><tr><th>On-policy</th><th>Off-policy</th></tr><tr><td>Learns the policy generating experience</td><td>Learns a target policy from another behaviour policy</td></tr><tr><td>Usually uses current-policy data</td><td>Can reuse experience from other policies</td></tr><tr><td>SARSA</td><td>Q-learning</td></tr><tr><td>PPO</td><td>DQN</td></tr><tr><td>Often simpler to reason about</td><td>Can reuse old or external data</td></tr></table>
+<h4>8.3 Are the two classifications related?</h4>
+<p>No, they are independent. An algorithm can be model-free or model-based, and on-policy or off-policy, in any combination.</p>
+<table><tr><th>Algorithm</th><th>Model type</th><th>Policy type</th></tr><tr><td>SARSA</td><td>Model-free</td><td>On-policy</td></tr><tr><td>Q-learning</td><td>Model-free</td><td>Off-policy</td></tr><tr><td>DQN</td><td>Model-free</td><td>Off-policy</td></tr><tr><td>PPO</td><td>Model-free</td><td>On-policy</td></tr><tr><td>Dyna-Q</td><td>Model-based</td><td>Typically off-policy Q-learning with planning</td></tr></table>
+</section>
+
+<section id="dp"><h2>Part 4: Dynamic programming</h2>
+<h3>9. Dynamic programming in RL</h3>
+<p>DP consists of methods for solving MDPs <b>when the environment model is known</b>. It uses Bellman equations to calculate state values and improve policies. DP requires the transition probabilities and reward model to be available:</p>
+<div class="eq">\[P(s'|s,a),\quad R(s,a,s')\]</div>
+<p>Two major algorithms: policy iteration and value iteration. Run value iteration in the simulator below.</p>
+<div class="g2"><div class="card"><b>Policy iteration</b><pre>init V, π arbitrarily
+repeat:
+  # evaluation
+  repeat until Δ&lt;θ:
+    V(s) ← Σ π(a|s) Σ P(s'|s,a)[R+γV(s')]
+  # improvement
+  π(s) ← argmax_a Σ P(s'|s,a)[R+γV(s')]
+until π stable</pre></div>
+<div class="card"><b>Value iteration</b><pre>init V(s)=0
+repeat until Δ&lt;θ:
+  for each s:
+    V(s) ← max_a Σ P(s'|s,a)[R+γV(s')]
+π(s) ← argmax_a Σ P(s'|s,a)[R+γV(s')]</pre></div></div>
+</section>
+
+<section id="lab"><h2>Simulator: cliff walking</h2>
+<div class="card">The agent starts at <b>S</b> (bottom-left) and must reach <b>G</b>. Each step costs −1. Stepping into the red cliff costs −100 and returns it to S. Brightness shows value, arrows show the greedy policy, the white line is the greedy path. <b>SARSA</b> (on-policy) learns the safer upper route because it counts its own exploratory slips. <b>Q-learning</b> (off-policy) hugs the cliff edge. <b>Value iteration</b> uses the known model.</div>
+<div class="row" id="algos"><button data-a="q" class="on">Q-learning</button><button data-a="s">SARSA</button><button data-a="v">Value iteration</button></div>
+<canvas id="cv" aria-label="Cliff walking gridworld"></canvas>
+<div class="ctl">
+<div><label class="l">ε exploration: <span id="ev" class="stat">0.10</span></label><input id="es" type="range" min="0" max="1" step="0.01" value="0.1"></div>
+<div><label class="l">α learning rate: <span id="av" class="stat">0.50</span></label><input id="as" type="range" min="0.05" max="1" step="0.05" value="0.5"></div>
+<div><label class="l">γ discount: <span id="gav" class="stat">0.95</span></label><input id="gas" type="range" min="0" max="1" step="0.01" value="0.95"></div>
+<div><label class="l">speed: <span id="sv" class="stat">20</span> steps/frame</label><input id="ss" type="range" min="1" max="200" step="1" value="20"></div></div>
+<p>Episodes: <span id="s1" class="stat">0</span> · Steps: <span id="s2" class="stat">0</span> · Last return: <span id="s3" class="stat">-</span></p>
+<div class="row sim-bar"><button id="run">Run</button><button id="stp">Step</button><button id="rst">Reset</button><button id="vals" class="on">Values</button></div>
+<div class="g2"><div class="card"><b>Q-learning (off-policy)</b><pre>init Q(s,a)=0
+for each episode:
+  s ← start
+  repeat:
+    a ← ε-greedy(Q,s)
+    take a; observe r, s'
+    Q(s,a) += α[r + γ max Q(s',·) − Q(s,a)]
+    s ← s'
+  until terminal</pre></div>
+<div class="card"><b>SARSA (on-policy)</b><pre>init Q(s,a)=0
+for each episode:
+  s ← start; a ← ε-greedy(Q,s)
+  repeat:
+    take a; observe r, s'
+    a' ← ε-greedy(Q,s')
+    Q(s,a) += α[r + γ Q(s',a') − Q(s,a)]
+    s ← s'; a ← a'
+  until terminal</pre></div></div>
+</section>
+
+<section id="mctd"><h2>5–6. Monte Carlo and temporal difference</h2>
+<div class="g2">
+<div class="card"><b>Monte Carlo</b><br>Needs no model. Plays full episodes, then averages observed returns. Works for episodic tasks and updates at episode end. Control uses ε-greedy improvement (on-policy) or importance sampling (off-policy).
+<div class="eq">\[V(S_t)\leftarrow V(S_t)+\alpha\,[G_t-V(S_t)]\]</div></div>
+<div class="card"><b>TD(0)</b><br>Updates after every step by bootstrapping from the next estimate: it combines MC (learn from experience) with DP (bootstrap).
+<div class="eq">\[V(S_t)\leftarrow V(S_t)+\alpha\,[R_{t+1}+\gamma V(S_{t+1})-V(S_t)]\]</div></div></div>
+<p>The bracketed TD term is the <b>TD error</b> \(\delta_t\). MC targets are unbiased but high variance. TD targets are biased but lower variance and update faster. SARSA and Q-learning (above) are TD control methods.</p>
+<pre>First-visit MC prediction
+for each episode generated by π:
+  compute returns G backwards from T
+  for each state s first visited at t:
+    append G_t to Returns(s)
+    V(s) ← average(Returns(s))</pre>
+</section>
+
+<section id="deep"><h2>Part 7: Deep reinforcement learning</h2>
+<p>Tabular methods store one value per state-action pair, which breaks down for images, continuous states or huge spaces. Deep RL replaces the table with a <b>neural network</b> (function approximation) that generalizes across similar states. The cost is instability: data are correlated and the learning targets keep moving. DQN and PPO are two classic ways of taming that.</p>
+
+<h3>7.1 DQN: Deep Q-Network (off-policy, value-based)</h3>
+<p>A network \(Q_\theta(s,\cdot)\) takes a state and outputs one Q-value per action. The agent acts ε-greedily and learns by minimizing the Bellman error from a <b>replay buffer</b>, using a separate <b>target network</b>.</p>
+<h4>Architecture diagram</h4>
+<div class="g2">
+<div class="card"><b>A. Acting loop</b>
+<div class="flow"><div class="node"><b>Environment</b><small>emits state s<sub>t</sub> (e.g. stacked frames)</small></div><div class="arr">state s<sub>t</sub></div><div class="node"><b>Q-network Q<sub>θ</sub></b><small>input → Conv/FC layers → FC → n outputs</small></div><div class="arr">Q(s,a<sub>1</sub>…a<sub>n</sub>)</div><div class="node"><b>ε-greedy</b><small>random with prob ε, else argmax</small></div><div class="arr">action a<sub>t</sub></div><div class="node"><b>Environment</b><small>returns r<sub>t</sub>, s<sub>t+1</sub>, done</small></div></div>
+<p class="note">Every transition (s, a, r, s′, done) is pushed into the replay buffer D.</p></div>
+<div class="card"><b>B. Learning loop</b>
+<div class="flow"><div class="node"><b>Replay buffer D</b><small>capacity N, oldest overwritten</small></div><div class="arr">random minibatch</div><div class="node"><b>Online net Q<sub>θ</sub></b><small>predicts Q(s,a)</small></div><div class="arr"></div><div class="node"><b>Target net Q<sub>θ⁻</sub></b><small>frozen copy, computes y = r + γ max Q(s′,·)</small></div><div class="arr">loss L(θ)</div><div class="node"><b>Gradient step</b><small>updates θ; every C steps θ⁻ ← θ</small></div></div></div></div>
+<h4>Key equations</h4>
+<div class="eq">\[y=\begin{cases}r&\text{if }s'\text{ is terminal}\\ r+\gamma\max_{a'}Q_{\theta^-}(s',a')&\text{otherwise}\end{cases}\]</div>
+<div class="eq">\[L(\theta)=\mathbb{E}_{(s,a,r,s')\sim D}\big[(y-Q_\theta(s,a))^2\big],\qquad\theta\leftarrow\theta-\eta\nabla_\theta L\]</div>
+<h4>Why each part exists</h4>
+<table><tr><th>Trick</th><th>Problem it solves</th></tr><tr><td>Experience replay</td><td>Consecutive samples are highly correlated. Random minibatches break the correlation and reuse data many times.</td></tr><tr><td>Target network</td><td>Without it the target moves with every update, so learning chases itself and can diverge.</td></tr><tr><td>ε-greedy decay</td><td>Explore early, exploit later (e.g. ε 1.0 → 0.05).</td></tr><tr><td>Reward clipping, frame stacking</td><td>Stabilize scale and give the network motion information.</td></tr></table>
+<h4>DQN algorithm</h4>
+<pre>Initialize replay buffer D with capacity N
+Initialize online network Q_θ with random weights
+Initialize target network Q_θ⁻ with θ⁻ ← θ
+for episode = 1 … M:
+  observe initial state s
+  for t = 1 … T:
+    with prob ε pick random a, else a ← argmax_a Q_θ(s,a)
+    execute a; observe r, s', done
+    store (s, a, r, s', done) in D
+    s ← s'
+    if |D| ≥ warm-up size:
+      sample minibatch of B transitions from D
+      for each (s_j,a_j,r_j,s'_j,d_j):
+        y_j ← r_j                                if d_j
+        y_j ← r_j + γ · max_a' Q_θ⁻(s'_j,a')    otherwise
+      L ← (1/B) Σ_j (y_j − Q_θ(s_j,a_j))²     (or Huber loss)
+      θ ← θ − η ∇_θ L                           (RMSprop / Adam)
+    every C steps: θ⁻ ← θ
+    decay ε
+    if done: break</pre>
+<table><tr><th>Typical hyperparameter</th><th>Value</th></tr><tr><td>Discount γ</td><td>0.99</td></tr><tr><td>Replay size N</td><td>10⁵ to 10⁶</td></tr><tr><td>Batch size B</td><td>32 to 128</td></tr><tr><td>Target update C</td><td>1,000 to 10,000 steps (or soft update τ ≈ 0.005)</td></tr><tr><td>Learning rate η</td><td>10⁻⁴ to 10⁻³</td></tr></table>
+<p class="note">Improvements: <b>Double DQN</b> picks the action with Q<sub>θ</sub> and evaluates it with Q<sub>θ⁻</sub> to reduce overestimation, <b>Dueling DQN</b> splits V(s) and advantage A(s,a), and <b>Prioritized replay</b> samples high-TD-error transitions more often.</p>
+
+<h3>7.2 Policy gradient and REINFORCE (on-policy)</h3>
+<p>Instead of values, learn the policy \(\pi_\theta(a|s)\) directly and push up the probability of actions that led to high return.</p>
+<div class="eq">\[J(\theta)=\mathbb{E}_{\pi_\theta}[G_0],\qquad\nabla_\theta J=\mathbb{E}\Big[\sum_t\nabla_\theta\log\pi_\theta(A_t|S_t)\,G_t\Big]\]</div>
+<pre>REINFORCE
+init policy network π_θ
+repeat:
+  generate an episode s_0,a_0,r_1 … using π_θ
+  for each step t: compute return G_t
+  θ ← θ + α Σ_t G_t ∇_θ log π_θ(a_t|s_t)</pre>
+<p class="note">Simple and unbiased, but high variance. Subtracting a baseline b(s) keeps it unbiased and reduces variance.</p>
+
+<h3>7.3 Actor-critic</h3>
+<p>The <b>actor</b> is the policy π<sub>θ</sub>. The <b>critic</b> V<sub>φ</sub>(s) estimates value and supplies a low-variance learning signal, the advantage:</p>
+<div class="eq">\[A_t=r_{t+1}+\gamma V_\phi(s_{t+1})-V_\phi(s_t),\qquad\theta\leftarrow\theta+\alpha A_t\nabla_\theta\log\pi_\theta(a_t|s_t)\]</div>
+<div class="eq">\[\phi\leftarrow\phi-\beta\nabla_\phi\big(r_{t+1}+\gamma V_\phi(s_{t+1})-V_\phi(s_t)\big)^2\]</div>
+</section>
+
+<section id="ppo"><h2>Part 8: PPO and other modern algorithms</h2>
+<h3>8.1 PPO: Proximal Policy Optimization (on-policy actor-critic)</h3>
+<p>A plain policy gradient can take one step that wrecks the policy. PPO reuses each batch of data for several epochs but <b>clips the probability ratio</b> so the new policy cannot move too far from the one that collected the data.</p>
+<h4>Architecture diagram</h4>
+<div class="g2">
+<div class="card"><b>A. Network</b>
+<div class="flow"><div class="node"><b>Observation s</b></div><div class="arr"></div><div class="node"><b>Shared or separate body</b><small>MLP / CNN layers</small></div></div>
+<div class="flow"><div class="node"><b>Actor head</b><small>π<sub>θ</sub>(a|s): softmax (discrete) or mean and std (continuous)</small></div><div class="node"><b>Critic head</b><small>V<sub>φ</sub>(s): one scalar value</small></div></div></div>
+<div class="card"><b>B. Training loop</b>
+<div class="flow"><div class="node"><b>1. Rollout</b><small>N parallel envs × T steps with π<sub>θold</sub></small></div><div class="arr">s,a,r,logπ<sub>old</sub>,V</div><div class="node"><b>2. GAE</b><small>compute advantages Â and returns</small></div><div class="arr">batch</div><div class="node"><b>3. K epochs of minibatch SGD</b><small>ratio → clip → loss → Adam</small></div><div class="arr">θ<sub>old</sub> ← θ</div><div class="node"><b>Repeat</b></div></div></div></div>
+<h4>Key equations</h4>
+<p>Generalized advantage estimation (GAE), with λ trading bias against variance:</p>
+<div class="eq">\[\delta_t=r_t+\gamma V(s_{t+1})-V(s_t),\qquad\hat A_t=\sum_{l=0}^{\infty}(\gamma\lambda)^l\delta_{t+l}\]</div>
+<p>Probability ratio and clipped objective:</p>
+<div class="eq">\[\rho_t(\theta)=\frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{old}}(a_t|s_t)}\]</div>
+<div class="eq">\[L^{CLIP}(\theta)=\mathbb{E}_t\Big[\min\big(\rho_t\hat A_t,\ \mathrm{clip}(\rho_t,1-\epsilon,1+\epsilon)\hat A_t\big)\Big]\]</div>
+<p>Total loss to minimize (value loss and an entropy bonus for exploration):</p>
+<div class="eq">\[L=-L^{CLIP}+c_1\,(V_\phi(s_t)-\hat R_t)^2-c_2\,\mathcal{H}[\pi_\theta(\cdot|s_t)]\]</div>
+<p class="note">If Â &gt; 0 the ratio is capped at 1+ε, so there is no incentive to raise a good action’s probability too far. If Â &lt; 0 it is floored at 1−ε.</p>
+<h4>PPO algorithm</h4>
+<pre>Initialize actor π_θ and critic V_φ
+for iteration = 1 … K_total:
+  # 1. collect data
+  for each of N parallel actors, run π_θold for T steps:
+    store s_t, a_t, r_t, done_t, log π_θold(a_t|s_t), V_φ(s_t)
+  # 2. advantages with GAE
+  Â_T ← 0
+  for t = T−1 … 0:
+    δ_t ← r_t + γ V(s_t+1)(1−done_t) − V(s_t)
+    Â_t ← δ_t + γ λ (1−done_t) Â_t+1
+    R̂_t ← Â_t + V(s_t)
+  normalize Â to mean 0, std 1
+  # 3. optimize the same batch for E epochs
+  for epoch = 1 … E:
+    for each minibatch of size M from the N·T samples:
+      ρ ← exp(log π_θ(a|s) − log π_θold(a|s))
+      L_clip ← mean( min(ρ·Â, clip(ρ,1−ε,1+ε)·Â) )
+      L_V ← mean( (V_φ(s) − R̂)² )
+      H ← mean( entropy(π_θ(·|s)) )
+      L ← −L_clip + c1·L_V − c2·H
+      Adam step on θ, φ  (clip gradient norm)
+  θ_old ← θ</pre>
+<table><tr><th>Typical hyperparameter</th><th>Value</th></tr><tr><td>Clip range ε</td><td>0.1 to 0.3 (0.2 common)</td></tr><tr><td>Epochs E per batch</td><td>3 to 10</td></tr><tr><td>γ, λ</td><td>0.99, 0.95</td></tr><tr><td>c1, c2</td><td>0.5, 0.01</td></tr><tr><td>Learning rate</td><td>3×10⁻⁴</td></tr></table>
+
+<h3>8.2 Other important methods</h3>
+<table><tr><th>Method</th><th>Type</th><th>Core idea</th></tr>
+<tr><td>DDPG</td><td>Off-policy, continuous actions</td><td>Deterministic actor μ(s) plus Q critic, with replay and target networks.</td></tr>
+<tr><td>SAC</td><td>Off-policy, continuous actions</td><td>Maximizes reward plus policy entropy, so exploration is built into the objective.</td></tr>
+<tr><td>DPO</td><td>Preference optimization</td><td>Trains the LLM directly on preference pairs, with no reward model or RL loop.</td></tr></table>
+<div class="eq">\[DDPG\ \text{critic target: }y=r+\gamma Q_{\phi^-}\big(s',\mu_{\theta^-}(s')\big)\]</div>
+<div class="eq">\[SAC:\ J(\pi)=\mathbb{E}\Big[\sum_t r_t+\alpha\,\mathcal{H}(\pi(\cdot|s_t))\Big]\]</div>
+</section>
+
+<section id="rlhf"><h2>Part 9: RLHF in detail</h2>
+<p>Reinforcement Learning from Human Feedback aligns an LLM with human preferences when “good” is hard to write as a reward function. In RL terms: the state is the prompt plus tokens so far, the action is the next token, the policy is the LLM, and the reward comes from a learned reward model.</p>
+<h4>Stage overview</h4>
+<div class="flow"><div class="node"><b>1. SFT</b><small>fine-tune on human demonstrations</small></div><div class="arr"></div><div class="node"><b>2. Reward model</b><small>learn from human rankings</small></div><div class="arr"></div><div class="node"><b>3. RL (PPO)</b><small>optimize the LLM against the reward model</small></div></div>
+<h4>Architecture of the RL stage (four models)</h4>
+<div class="flow"><div class="node"><b>Prompt x</b></div><div class="arr">sample</div><div class="node"><b>Policy π<sub>θ</sub></b><small>trainable LLM, writes response y</small></div><div class="arr">response y</div><div class="node"><b>Reward model r<sub>φ</sub></b><small>frozen, scores (x,y)</small></div></div>
+<div class="flow"><div class="node"><b>Reference π<sub>ref</sub></b><small>frozen SFT model, gives log π<sub>ref</sub> for the KL penalty</small></div><div class="arr">KL per token</div><div class="node"><b>Total reward</b><small>r<sub>φ</sub> − β·KL</small></div><div class="arr">advantages</div><div class="node"><b>Value model V<sub>ψ</sub></b><small>critic head, estimates return</small></div><div class="arr">PPO update</div><div class="node"><b>Updated π<sub>θ</sub></b></div></div>
+<h4>Stage 1: supervised fine-tuning</h4>
+<div class="eq">\[L_{SFT}=-\mathbb{E}_{(x,y)\sim\text{demos}}\sum_t\log\pi_\theta(y_t\mid x,y_{&lt;t})\]</div>
+<h4>Stage 2: reward model from preferences</h4>
+<p>For a prompt x, labelers pick a preferred response y<sub>w</sub> over y<sub>l</sub>. The reward model (an LLM with a scalar head) is trained with the Bradley-Terry loss:</p>
+<div class="eq">\[L_{RM}(\phi)=-\mathbb{E}_{(x,y_w,y_l)}\Big[\log\sigma\big(r_\phi(x,y_w)-r_\phi(x,y_l)\big)\Big]\]</div>
+<h4>Stage 3: RL optimization</h4>
+<div class="eq">\[\max_{\pi_\theta}\ \mathbb{E}_{x,\,y\sim\pi_\theta}\big[r_\phi(x,y)\big]-\beta\,\mathrm{KL}\big(\pi_\theta(\cdot|x)\,\|\,\pi_{ref}(\cdot|x)\big)\]</div>
+<p>In practice the KL is applied per token, and the reward model score is added at the final token:</p>
+<div class="eq">\[R_t=-\beta\log\frac{\pi_\theta(y_t|x,y_{&lt;t})}{\pi_{ref}(y_t|x,y_{&lt;t})}\ \ (+\,r_\phi(x,y)\ \text{at the last token})\]</div>
+<h4>RLHF algorithm</h4>
+<pre>Step 1 (SFT)
+  fine-tune base LLM on demonstrations → π_SFT; set π_ref ← π_SFT
+
+Step 2 (reward model)
+  collect prompts x, sample several responses, humans rank them
+  build pairs (x, y_w, y_l)
+  train r_φ to minimize −log σ(r_φ(x,y_w) − r_φ(x,y_l))
+
+Step 3 (RL with PPO)
+  init π_θ ← π_SFT; init value head V_ψ; freeze π_ref and r_φ
+  for iteration = 1 … K_total:
+    sample a batch of prompts x
+    generate responses y ~ π_θold(·|x); save log-probs
+    score r ← r_φ(x,y)
+    for each token t:
+      R_t ← −β (log π_θold(y_t|·) − log π_ref(y_t|·))
+    add r to R_T at the final token
+    compute values V_ψ, advantages Â (GAE) and returns
+    for epoch = 1 … E:
+      for each minibatch:
+        ρ ← π_θ(y_t|·) / π_θold(y_t|·)
+        L_policy ← −mean( min(ρÂ, clip(ρ,1−ε,1+ε)Â) )
+        L_value ← mean( (V_ψ − R̂)² )
+        update θ, ψ
+    π_θold ← π_θ
+  (optionally adapt β to keep KL near a target)</pre>
+<h4>DPO: skipping the reward model</h4>
+<p>Direct Preference Optimization derives a closed-form loss from the same objective, trained straight on the preference pairs:</p>
+<div class="eq">\[L_{DPO}=-\mathbb{E}\Big[\log\sigma\Big(\beta\log\frac{\pi_\theta(y_w|x)}{\pi_{ref}(y_w|x)}-\beta\log\frac{\pi_\theta(y_l|x)}{\pi_{ref}(y_l|x)}\Big)\Big]\]</div>
+<table><tr><th>Concern</th><th>Why it matters</th></tr><tr><td>Reward hacking</td><td>The policy can exploit flaws in the reward model. The KL term limits this.</td></tr><tr><td>Cost</td><td>PPO-RLHF keeps four large models in memory. DPO needs only the policy and a frozen reference.</td></tr><tr><td>Label quality</td><td>Preferences are noisy and subjective. Reward quality bounds alignment quality.</td></tr></table>
+</section>
+
+</main>
+<script>
+const $=id=>document.getElementById(id);
+document.querySelectorAll('table').forEach(t=>{const h=[...t.rows[0].cells].map(c=>c.textContent);t.rows[0].classList.add('hr');[...t.rows].slice(1).forEach(r=>[...r.cells].forEach((c,i)=>c.dataset.l=h[i]||''))});
+// settings
+const K='rlset';let S={ts:100,st:1,fw:0};try{Object.assign(S,JSON.parse(localStorage.getItem(K)||'{}'))}catch(e){}
+function ap(){document.documentElement.style.setProperty('--fs',S.ts);document.body.classList.toggle('nost',!S.st);document.body.classList.toggle('fw',!!S.fw);
+$('tsv').textContent=S.ts+'%';$('ts').value=S.ts;$('st').checked=!!S.st;$('fw').checked=!!S.fw;try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}setTimeout(fit,60)}
+$('gear').onclick=()=>{const p=$('panel');p.hidden=!p.hidden;$('gear').setAttribute('aria-expanded',!p.hidden)};
+$('ts').oninput=e=>{S.ts=+e.target.value;ap()};$('st').onchange=e=>{S.st=e.target.checked?1:0;ap()};$('fw').onchange=e=>{S.fw=e.target.checked?1:0;ap()};
+$('rs').onclick=()=>{S={ts:100,st:1,fw:0};ap()};
+// small calculators
+function gcalc(){const g=+$('gs').value;$('gv').textContent=g.toFixed(2);$('gd').textContent=(g*20).toFixed(1);$('gr').textContent=(10+g*20).toFixed(1)}
+$('gs').oninput=gcalc;gcalc();
+function ecalc(){const e=+$('eps0').value;$('epv').textContent=e.toFixed(2);$('b1').style.width=e*100+'%';$('b2').style.width=(1-e)*100+'%';$('b1').textContent=e>.12?'explore '+Math.round(e*100)+'%':'';$('b2').textContent=e<.88?'exploit '+Math.round((1-e)*100)+'%':''}
+$('eps0').oninput=ecalc;ecalc();
+// gridworld
+const R=5,C=8,START=32,GOAL=39,dr=[-1,0,1,0],dc=[0,1,0,-1],AR=['↑','→','↓','←'];
+const cliff=s=>Math.floor(s/C)==4&&s%C>0&&s%C<7;
+function step(s,a){let r=Math.min(R-1,Math.max(0,Math.floor(s/C)+dr[a])),c=Math.min(C-1,Math.max(0,s%C+dc[a])),n=r*C+c;if(cliff(n))return[START,-100,false];return[n,-1,n==GOAL]}
+let algo='q',Q,V,s,a,ep,steps,ret,last,run=false,eps=.1,al=.5,ga=.95,spd=20,showV=true;
+function reset(){Q=new Float64Array(R*C*4);V=new Float64Array(R*C);s=START;a=null;ep=0;steps=0;ret=0;last='-';draw()}
+const qv=(t,k)=>{if(algo=='v'){const[n,r,d]=step(t,k);return r+(d?0:ga*V[n])}return Q[t*4+k]};
+function greedy(t){let b=-1e9,bs=[];for(let k=0;k<4;k++){const v=qv(t,k);if(v>b+1e-9){b=v;bs=[k]}else if(Math.abs(v-b)<=1e-9)bs.push(k)}return bs[Math.floor(Math.random()*bs.length)]}
+function greedy2(t){let b=-1e9,bk=0;for(let k=0;k<4;k++){const v=qv(t,k);if(v>b+1e-9){b=v;bk=k}}return bk}
+const pick=t=>Math.random()<eps?Math.floor(Math.random()*4):greedy(t);
+const mx=t=>algo=='v'?V[t]:Math.max(Q[t*4],Q[t*4+1],Q[t*4+2],Q[t*4+3]);
+function tick(){
+if(algo=='v'){for(let t=0;t<R*C;t++){if(t==GOAL||cliff(t))continue;V[t]=Math.max(qv(t,0),qv(t,1),qv(t,2),qv(t,3))}steps++;return}
+if(a===null)a=pick(s);
+const[n,r,d]=step(s,a);ret+=r;steps++;let a2=null,tgt;
+if(algo=='q')tgt=r+(d?0:ga*Math.max(Q[n*4],Q[n*4+1],Q[n*4+2],Q[n*4+3]));else{a2=pick(n);tgt=r+(d?0:ga*Q[n*4+a2])}
+Q[s*4+a]+=al*(tgt-Q[s*4+a]);s=n;a=algo=='s'?a2:pick(n);
+if(d||ret<-3000){ep++;last=ret;ret=0;s=START;a=null}}
+const cv=$('cv'),x=cv.getContext('2d');let W=80,dpr=1;
+function fit(){const w=Math.max(200,cv.parentElement.clientWidth);dpr=Math.min(2,window.devicePixelRatio||1);W=w/C;cv.width=Math.round(w*dpr);cv.height=Math.round(W*R*dpr);cv.style.height=(W*R)+'px';draw()}
+function draw(){if(!x)return;x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W*C,W*R);x.textAlign='center';x.textBaseline='middle';
+const vOK=showV&&W*.17>=8.5;
+for(let t=0;t<R*C;t++){const cx=(t%C)*W,cy=Math.floor(t/C)*W;
+if(cliff(t)){x.fillStyle='#4a0a10';x.fillRect(cx,cy,W,W);if(W>=48){x.fillStyle='#ff2a3d';x.font='700 '+Math.max(9,W*.17)+'px monospace';x.fillText('CLIFF',cx+W/2,cy+W/2)}}
+else{const v=t==GOAL?0:mx(t),k=Math.max(0,Math.min(1,(v+60)/60));x.fillStyle=`rgba(255,42,61,${.04+k*.5})`;x.fillRect(cx,cy,W,W);
+if(t!=GOAL){x.fillStyle='#fff';x.font=(W*.4)+'px monospace';x.fillText(AR[greedy2(t)],cx+W/2,cy+(vOK?W*.36:W*.5));
+if(vOK){x.fillStyle='#b8b8c0';x.font=(W*.17)+'px monospace';x.fillText(v.toFixed(1),cx+W/2,cy+W*.68)}}}
+x.strokeStyle='#2a2a2e';x.strokeRect(cx,cy,W,W)}
+x.fillStyle='#fff';x.font='700 '+(W*.28)+'px monospace';x.fillText('S',START%C*W+W*.2,Math.floor(START/C)*W+W*.2);x.fillText('G',GOAL%C*W+W/2,Math.floor(GOAL/C)*W+W/2);
+x.strokeStyle='#fff';x.lineWidth=Math.max(2,W*.04);x.beginPath();let p=START,seen=new Set();x.moveTo(p%C*W+W/2,Math.floor(p/C)*W+W/2);
+for(let i=0;i<40&&p!=GOAL&&!seen.has(p);i++){seen.add(p);const n=step(p,greedy2(p))[0];if(n==START&&p!=START)break;p=n;x.lineTo(p%C*W+W/2,Math.floor(p/C)*W+W/2)}x.stroke();x.lineWidth=1;
+x.fillStyle='#ff2a3d';x.beginPath();x.arc(s%C*W+W/2,Math.floor(s/C)*W+W*.84,Math.max(4,W*.09),0,7);x.fill();
+$('s1').textContent=ep;$('s2').textContent=steps;$('s3').textContent=last}
+function loop(){if(run){for(let i=0;i<spd;i++)tick();draw()}requestAnimationFrame(loop)}
+$('run').onclick=()=>{run=!run;$('run').textContent=run?'Pause':'Run'};
+$('stp').onclick=()=>{tick();draw()};$('rst').onclick=reset;
+$('vals').onclick=()=>{showV=!showV;$('vals').classList.toggle('on',showV);draw()};
+document.querySelectorAll('#algos button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#algos button').forEach(o=>o.classList.remove('on'));b.classList.add('on');algo=b.dataset.a;reset()});
+[['es','ev',v=>eps=v],['as','av',v=>al=v],['gas','gav',v=>ga=v],['ss','sv',v=>spd=v]].forEach(([i,o,f])=>{$(i).oninput=()=>{const v=+$(i).value;$(o).textContent=i=='ss'?v:v.toFixed(2);f(v)}});
+addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeout(fit,200));
+// nav highlight
+const nav=document.querySelector('nav'),links=[...nav.querySelectorAll('a')];
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;links.forEach(l=>{const on=l.getAttribute('href')=='#'+e.target.id;l.classList.toggle('cur',on);if(on)nav.scrollTo({left:l.offsetLeft-nav.clientWidth/2+l.clientWidth/2,behavior:'smooth'})})}),{rootMargin:'-30% 0px -60% 0px'});
+document.querySelectorAll('main section').forEach(t=>io.observe(t));
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&run)$('run').click()});
+ap();reset();fit();loop();
+</script><script>if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script></body></html>
